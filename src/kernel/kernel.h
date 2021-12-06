@@ -8,6 +8,8 @@
 
 #include "../memory/paging/PageFrameAllocator.h"
 #include "../memory/paging/PageMapIndex.h"
+#include "../memory/paging/Paging.h"
+#include "../memory/paging/PageTableManager.h"
 
 struct BootInfo {
 	Framebuffer* framebuffer;

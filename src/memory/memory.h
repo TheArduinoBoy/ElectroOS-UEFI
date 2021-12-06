@@ -9,5 +9,5 @@ struct EFI_MEMORY_DESCRIPTOR {
     uint64_t numPages;
     uint64_t attribs;
 };
+void memoryset(void*, uint8_t, uint64_t);
 uint64_t getMemorySize(EFI_MEMORY_DESCRIPTOR*, uint64_t, uint64_t);
-void memset(void*, uint8_t, uint64_t);

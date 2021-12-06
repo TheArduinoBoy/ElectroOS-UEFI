@@ -15,14 +15,21 @@ extern "C" int _start(BootInfo* bootinfo){
     print.print(intToString((pageFrameAloc.GetReservedRAM() / 1024) / 1024));
     print.println("MB");
 
-    PageMapIndex pageIndexer(0x1000 * 52 + 0x50000 * 7);
-    print.print(uintToString(pageIndexer.getP()));
-    print.print(" - ");
-    print.print(uintToString(pageIndexer.getPT()));
-    print.print(" - ");
-    print.print(uintToString(pageIndexer.getPD()));
-    print.print(" - ");
-    print.println(uintToString(pageIndexer.getPDP()));
+    PageTable* PML4 = (PageTable*) pageFrameAloc.RequestPage();
+    memoryset(PML4, 0, 0x1000);
+    PageTableManager pageManager(PML4, utils);
+
+    uint64_t mapEntries = (uint64_t) bootinfo->mMapSize / bootinfo->mMapDescSize;
+    uint64_t fbBase = (uint64_t) bootinfo->framebuffer->BaseAddress;
+    uint64_t fbSize = (uint64_t) bootinfo->framebuffer->BufferSize + 0x1000;
+
+    for(uint64_t t = 0; t < getMemorySize(bootinfo->mMap, mapEntries, bootinfo->mMapDescSize); t+=0x1000)
+        pageManager.mapMemory((void*) t, (void*)t);
+    for(uint64_t t = ((uint64_t) bootinfo->framebuffer->BaseAddress); t < ((uint64_t) (fbBase + fbSize)); t += 0x1000)
+        pageManager.mapMemory((void*) t, (void*)t);
+    asm("mov %0, %%cr3" :: "r"(PML4));
+
+    print.println("Successfuly loaded PageTableManager");
 
     while(1);
     return 0;

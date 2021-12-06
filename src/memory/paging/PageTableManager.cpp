@@ -14,7 +14,7 @@ void PageTableManager::mapMemory(void* vmem, void* pmem) {
     PageTable* PDP;
     if(!PDE.Present) { 
         PDP = (PageTable*) pageFrameAloc.RequestPage();
-        memset(PDP, 0, 0x1000);
+        memoryset(PDP, 0, 0x1000);
         PDE.Address = (uint64_t) PDP >> 12;
         PDE.Present = true;
         PDE.RW = true;
@@ -25,10 +25,27 @@ void PageTableManager::mapMemory(void* vmem, void* pmem) {
     PageTable* PD;
     if(!PDE.Present) { 
         PD = (PageTable*) pageFrameAloc.RequestPage();
-        memset(PD, 0, 0x1000);
+        memoryset(PD, 0, 0x1000);
         PDE.Address = (uint64_t) PD >> 12;
         PDE.Present = true;
         PDE.RW = true;
         PML4Address->entries[indexer.getPD()] = PDE;
-    } else PDP = (PageTable*) ((uint64_t) PDE.Address << 12);
+    } else PD = (PageTable*) ((uint64_t) PDE.Address << 12);
+
+    PDE = PDP->entries[indexer.getPD()];
+    PageTable* PT;
+    if(!PDE.Present) { 
+        PT = (PageTable*) pageFrameAloc.RequestPage();
+        memoryset(PT, 0, 0x1000);
+        PDE.Address = (uint64_t) PT >> 12;
+        PDE.Present = true;
+        PDE.RW = true;
+        PML4Address->entries[indexer.getPT()] = PDE;
+    } else PT = (PageTable*) ((uint64_t) PDE.Address << 12);
+
+    PDE = PT->entries[indexer.getP()];
+    PDE.Address = (uint64_t) pmem >> 12;
+    PDE.Present = true;
+    PDE.RW = true;
+    PT->entries[indexer.getP()] = PDE;
 }
