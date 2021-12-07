@@ -1,6 +1,6 @@
 # ElectroOS-UEFI
 
-## How do i compile this thing???
+## How do i compile this OS???
 ### Download/Clone this repo
 ### CD into the repo and run 
 ```bash
